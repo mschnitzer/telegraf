@@ -19,6 +19,7 @@ The following defaults are known to work with RabbitMQ:
   url = "amqp://localhost:5672/influxdb"
   ## AMQP exchange
   exchange = "telegraf"
+  exchange_passive = false
   ## AMQP queue name
   queue = "telegraf"
   ## Binding Key

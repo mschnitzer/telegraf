@@ -20,6 +20,7 @@ type AMQPConsumer struct {
 	URL string
 	// AMQP exchange
 	Exchange string
+	ExchangePassive bool
 	// Queue Name
 	Queue string
 	// Binding Key
@@ -65,6 +66,7 @@ func (a *AMQPConsumer) SampleConfig() string {
   url = "amqp://localhost:5672/influxdb"
   ## AMQP exchange
   exchange = "telegraf"
+  exchange_passive = false
   ## AMQP queue name
   queue = "telegraf"
   ## Binding Key
@@ -180,15 +182,27 @@ func (a *AMQPConsumer) connect(amqpConf *amqp.Config) (<-chan amqp.Delivery, err
 		return nil, fmt.Errorf("Failed to open a channel: %s", err)
 	}
 
-	err = ch.ExchangeDeclare(
-		a.Exchange, // name
-		"topic",    // type
-		true,       // durable
-		false,      // auto-deleted
-		false,      // internal
-		false,      // no-wait
-		nil,        // arguments
-	)
+	if a.ExchangePassive == true {
+		err = ch.ExchangeDeclarePassive(
+			a.Exchange, // name
+			"topic",    // type
+			true,       // durable
+			false,      // auto-deleted
+			false,      // internal
+			false,      // no-wait
+			nil,        // arguments
+		)
+	} else {
+		err = ch.ExchangeDeclare(
+			a.Exchange, // name
+			"topic",    // type
+			true,       // durable
+			false,      // auto-deleted
+			false,      // internal
+			false,      // no-wait
+			nil,        // arguments
+		)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("Failed to declare an exchange: %s", err)
 	}
